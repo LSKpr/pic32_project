@@ -66,7 +66,7 @@ int main(void) {
 
 	// turn on animation
 	display_image(0, screen2);
-	// delay(8);
+	delay(8);
 	display_clear();
 	while( 1 )
 	{
