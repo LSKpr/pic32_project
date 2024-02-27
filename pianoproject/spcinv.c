@@ -11,6 +11,7 @@
 #define Yship2   7
 #define LOADING_TIME    5
 char leaderboard[3][3] = {"XXX","XXX","XXX"};
+char scorestring[16] = "               ";
 int score[3] = {0,0,0};
 int scorenow;
 int aliens_left;
@@ -558,7 +559,125 @@ char wave_num[16] = "``WAVE``````";
 void wave_edit(int x)
 {
     wave_num[10] = x%10 + '0';
-    wave_num[9] = (x/10)%0 +'0';
+    wave_num[9] = (x/10)%10 +'0';
+}
+void score_to_string(int x)
+{
+    char i;
+    for ( i = 0; i < 16; i++)   scorestring[i] = ' ';
+    i = 14;
+    while(x > 0)
+    {
+        scorestring[i] = x%10 + '0';
+        i--;
+        x /= 10; 
+    }
+}
+char realname[3] = "AAA";
+void swap(char* a, char* b)
+{
+    char help = *a;
+    *a = *b;
+    *b = help;
+}
+void update_leaderboard()
+{
+    int i;
+    char j;
+    if(score[2] < scorenow)
+    {
+        score[2] = scorenow;
+        leaderboard[2][0] = realname[0]; 
+        leaderboard[2][1] = realname[1]; 
+        leaderboard[2][2] = realname[2]; 
+    }
+    display_string(0,"``LEADERBOARD``");
+    for ( j = 0; j < 3; j++)
+    {
+        char ldrbrdspace[16] = "               "; 
+        int k;
+        for ( k = 0; k < 3; k++)    ldrbrdspace[k] = leaderboard[j][k];
+        score_to_string(score[j]);
+        for ( k = 3; k < 16; k++)   ldrbrdspace[k] = scorestring[k];
+        display_string(j+1,ldrbrdspace);
+    }
+    display_update(1);
+    delay(3);
+
+    for ( i = 1; i >=0; i--)
+    {
+        if(score[i] < score[i+1])
+        {
+            swap(&(score[i]),&(score[i+1]));
+            char help[3];
+            for ( j = 0; j < 3; j++)    swap(&leaderboard[i][j], &leaderboard[i+1][j]);
+            display_string(0,"``LEADERBOARD``");
+            for ( j = 0; j < 3; j++)
+            {
+                char ldrbrdspace[16] = "               "; 
+                int k;
+                for ( k = 0; k < 3; k++)    ldrbrdspace[k] = leaderboard[j][k];
+                score_to_string(score[j]);
+                for ( k = 3; k < 16; k++)   ldrbrdspace[k] = scorestring[k];
+                display_string(j+1,ldrbrdspace);
+            }
+            display_update(1);
+            delay(4);
+        }
+    }
+
+    delay(3);
+    
+}
+void score_screen()
+{
+    PORTE = 0xff;
+    char select_letter = 0;
+    char name[] = "      AAA      ";
+    realname[0] = 'A';
+    realname[1] = 'A';
+    realname[2] = 'A';
+    score_to_string(scorenow);
+    while(select_letter < 3)
+    {
+        if(getbtns() & 1)
+        {
+            realname[select_letter] = (realname[select_letter] - 'A' + 1) % 26 + 'A';
+            while(getbtns() & 1)
+            {}
+        }
+        if(getbtns() & 2)
+        {
+            realname[select_letter] = (realname[select_letter] - 'A' - 1) % 26 + 'A'; // modulo -1 is a feature not a bug :)
+            while(getbtns() & 2)
+            {}
+        }
+        if(getbtns() & 4)
+        {
+            select_letter--;
+            if(select_letter < 0)   select_letter = 0;
+            while(getbtns() & 4)
+            {}
+        }
+        if(getbtns() & 8)
+        {
+            select_letter++;
+            while(getbtns() & 8)
+            {}
+        }
+                
+
+        name[6] = realname[0];
+        name[7] = realname[1];
+        name[8] = realname[2];
+        
+        display_string(0, "ENTER YOUR NAME");
+        display_string(1,name);
+        display_string(2, "     SCORE     ");
+        display_string(3, scorestring);
+        display_update(2);
+    }
+    update_leaderboard();
 }
 void plr_1()
 {
@@ -597,7 +716,7 @@ void plr_1()
 
     }
 
-
+    score_screen();
 
 
 }
@@ -655,6 +774,7 @@ void spcinvmenu()
     
     while(1)
     {
+        scorenow = 0;
         display_string(0, "SPACE`INVADERS`");
         display_string(1, "   1_PLAYER");
         display_string(2, "   2_PLAYERS");
@@ -681,6 +801,8 @@ void spcinvmenu()
             display_clear();
             if(mode == 1)   plr_1();
             if(mode == 2)   plr_2();
+            if(mode == 3)   update_leaderboard();
+            if(mode == 0)   return;
             
         }
     }
