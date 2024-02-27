@@ -163,7 +163,7 @@ void toTable(char screen[128][32])
 }
 int rrand(int a )
 {
-    return (TMR2 * a) % (a + 100007);
+    return (TMR2 * (a + 3) * 2137 + TMR2) % (a + 100007);
 }
 void display_clear()
 {
