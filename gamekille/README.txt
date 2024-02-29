@@ -1,7 +1,10 @@
+pic32 with basic I/O shield game console:
+
 Compilation and Installation:
 I am using this toolchain: https://github.com/is1200-example-projects/mcb32tools
-make
-make install TTYDEV=/dev/ttyS2
+
+1. make
+2. make install TTYDEV=/dev/ttyS2
 (ttyS# # -> might be different than 2)
 
 Main Menu Controls:
